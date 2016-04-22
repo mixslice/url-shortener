@@ -1,0 +1,17 @@
+lighthouse:
+  build: .
+  ports:
+    - "3000:3000"
+  environment:
+    - VIRTUAL_HOST=lighthouse.docker
+  links:
+    - influxdb:influxdb.docker
+influxdb:
+  image: tutum/influxdb
+  volumes:
+    - ./influxdb:/data
+  ports:
+    - "8083:8083"
+    - "8086:8086"
+  environment:
+    - VIRTUAL_HOST=influxdb.docker

@@ -1,0 +1,13 @@
+lighthouse_staging:
+  image: registry.digitwalk.com/lighthouse-node:staging
+  ports:
+    - "5001:3000"
+  external_links:
+    - influxdb:influxdb
+  environment:
+    - NODE_ENV=staging
+    - VIRTUAL_HOST=beta.lighthouse.digitwalk.com
+  log_driver: fluentd
+  log_opt:
+    fluentd-address: "localhost:24224"
+  restart: always
