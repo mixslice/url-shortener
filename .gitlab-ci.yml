@@ -1,5 +1,5 @@
 variables:
-  IMAGE: registry.digitwalk.com/lighthouse-node
+  IMAGE: registry.digitwalk.com/url-shortener
 
 stages:
   - build
@@ -31,7 +31,7 @@ deploy_staging:
   stage: deploy
   script:
     - docker-compose -f staging.yml pull
-    - docker-compose -f staging.yml run --rm lighthouse_staging env
+    - docker-compose -f staging.yml run --rm urlshortener_staging env
     - docker-compose -f staging.yml up -d
   only:
     - /^release\/.*$/
@@ -72,7 +72,7 @@ deploy_production:
   stage: deploy
   script:
     - docker-compose -f production.yml pull
-    - docker-compose -f production.yml run --rm lighthouse_production env
+    - docker-compose -f production.yml run --rm urlshortener_production env
     - docker-compose -f production.yml up -d
   only:
     - master

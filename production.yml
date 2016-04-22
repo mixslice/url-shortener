@@ -1,12 +1,12 @@
-lighthouse_production:
-  image: registry.digitwalk.com/lighthouse-node:dist
+urlshortener_production:
+  image: registry.digitwalk.com/url-shortener:dist
   ports:
     - "5002:3000"
   external_links:
     - influxdb:influxdb
   environment:
     - NODE_ENV=production
-    - VIRTUAL_HOST=lighthouse.digitwalk.com
+    - VIRTUAL_HOST=urlshortener.digitwalk.com
   log_driver: fluentd
   log_opt:
     fluentd-address: "localhost:24224"

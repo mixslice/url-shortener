@@ -1,6 +1,6 @@
-lighthouse-node backend
+url-shortener backend
 =========================
-The lighthouse track backend written in nodejs.
+Self hosted url shortener written in nodejs.
 
 
 ## Getting Started

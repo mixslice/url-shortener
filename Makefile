@@ -1,5 +1,5 @@
 start:
-	docker-compose up -d influxdb
+	docker-compose up -d
 
 stop:
 	docker-compose stop

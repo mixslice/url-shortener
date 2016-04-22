@@ -28,7 +28,6 @@
     "express-useragent": "^0.2.4",
     "influx": "^4.1.0",
     "js-schema": "^1.0.1",
-    "lodash.pick": "^4.1.1",
     "loglevel": "^1.4.0",
     "morgan": "^1.7.0",
     "rimraf": "^2.5.2"

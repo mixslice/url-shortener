@@ -1,9 +1,9 @@
-lighthouse:
+urlshortener:
   build: .
   ports:
     - "3000:3000"
   environment:
-    - VIRTUAL_HOST=lighthouse.docker
+    - VIRTUAL_HOST=urlshortener.docker
   links:
     - influxdb:influxdb.docker
 influxdb:
