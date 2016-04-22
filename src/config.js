@@ -3,19 +3,22 @@ module.exports = function config() {
     case 'production':
       return {
         loglevel: 'info',
-        dbhost: 'mongo'
+        dbhost: 'mongo',
+        host: process.env.VIRTUAL_HOST
       };
 
     case 'staging':
       return {
         loglevel: 'trace',
-        dbhost: 'mongo'
+        dbhost: 'mongo',
+        host: process.env.VIRTUAL_HOST
       };
 
     default:
       return {
         loglevel: 'trace',
-        dbhost: 'mongo.docker'
+        dbhost: 'mongo.docker',
+        host: 'localhost:3000'
       };
   }
 };

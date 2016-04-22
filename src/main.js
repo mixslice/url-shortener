@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import useragent from 'express-useragent';
 import shortid from 'shortid';
+import url from 'url';
 import Config from './config';
 const config = new Config();
 
@@ -68,6 +69,24 @@ app.post('/shorten', (req, res) => {
 
   // process url
   const originalUrl = req.body.url;
+  const parsedUrl = url.parse(originalUrl);
+
+  /**
+   * only support http(s) yet
+   */
+  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+    res.status(422).json({ error: 'only http and https are supported' });
+    return;
+  }
+
+  /**
+   * already shortened url
+   */
+  if (parsedUrl.host === config.host) {
+    res.status(422).json({ error: 'invalid url' });
+    return;
+  }
+
   const Record = mongoose.model('Record', recordSchema);
   const record = new Record({ url: originalUrl });
   record.save();
@@ -75,9 +94,9 @@ app.post('/shorten', (req, res) => {
   res.json(record);
 });
 
-app.get('/:id', (req, res) => {
+app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
   // redirect to longurl
-  const id = req.params.id;
+  const id = req.params[0];
 
   const Record = mongoose.model('Record', recordSchema);
   Record.findOne({ _id: id }, (err, obj) => {
