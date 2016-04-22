@@ -36,6 +36,11 @@ const recordSchema = mongoose.Schema({
 const visitSchema = mongoose.Schema({
   _shortId: String,
   ua: String,
+  browser: String,
+  platform: String,
+  version: String,
+  os: String,
+  ip: String,
   created: { type: Date, default: Date.now }
 });
 
@@ -112,9 +117,21 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
     } else {
       // store visit info
       const ua = req.useragent;
+      const browser = ua.browser;
+      const platform = ua.platform;
+      const version = ua.version;
+      const os = ua.os;
+      const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+      // store data
       const Visit = mongoose.model('Visit', visitSchema);
       const visit = new Visit({
         _shortId: id,
+        ip,
+        browser,
+        platform,
+        version,
+        os,
         ua: ua.source
       });
       visit.save();
