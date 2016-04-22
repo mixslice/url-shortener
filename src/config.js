@@ -3,19 +3,19 @@ module.exports = function config() {
     case 'production':
       return {
         loglevel: 'info',
-        dbhost: 'influxdb'
+        dbhost: 'mongo'
       };
 
     case 'staging':
       return {
         loglevel: 'trace',
-        dbhost: 'influxdb'
+        dbhost: 'mongo'
       };
 
     default:
       return {
         loglevel: 'trace',
-        dbhost: 'influxdb.docker'
+        dbhost: 'mongo.docker'
       };
   }
 };

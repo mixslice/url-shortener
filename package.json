@@ -24,12 +24,13 @@
     "babel-cli": "^6.6.5",
     "babel-core": "^6.5.2",
     "babel-preset-es2015": "^6.5.0",
+    "body-parser": "^1.15.0",
     "express": "^4.13.4",
     "express-useragent": "^0.2.4",
-    "influx": "^4.1.0",
-    "js-schema": "^1.0.1",
     "loglevel": "^1.4.0",
+    "mongoose": "^4.4.13",
     "morgan": "^1.7.0",
-    "rimraf": "^2.5.2"
+    "rimraf": "^2.5.2",
+    "shortid": "^2.2.6"
   }
 }

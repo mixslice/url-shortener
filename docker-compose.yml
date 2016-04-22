@@ -5,13 +5,10 @@ urlshortener:
   environment:
     - VIRTUAL_HOST=urlshortener.docker
   links:
-    - influxdb:influxdb.docker
-influxdb:
-  image: tutum/influxdb
-  volumes:
-    - ./influxdb:/data
+    - mongo:mongo.docker
+mongo:
+  image: index.alauda.cn/library/mongo
   ports:
-    - "8083:8083"
-    - "8086:8086"
+    - "27017:27017"
   environment:
-    - VIRTUAL_HOST=influxdb.docker
+    - VIRTUAL_HOST=mongo.docker

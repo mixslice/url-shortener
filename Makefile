@@ -1,5 +1,5 @@
 start:
-	docker-compose up -d
+	docker-compose up -d mongo
 
 stop:
 	docker-compose stop

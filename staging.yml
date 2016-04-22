@@ -1,9 +1,9 @@
 urlshortener_staging:
   image: registry.digitwalk.com/url-shortener:staging
   ports:
-    - "5001:3000"
+    - "5037:3000"
   external_links:
-    - influxdb:influxdb
+    - mongo:mongo
   environment:
     - NODE_ENV=staging
     - VIRTUAL_HOST=urlshortener.digitwalk.com

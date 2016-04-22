@@ -1,9 +1,10 @@
 import log from 'loglevel';
 import express from 'express';
 import morgan from 'morgan';
-import schema from 'js-schema';
-import influx from 'influx';
+import mongoose from 'mongoose';
+import bodyParser from 'body-parser';
 import useragent from 'express-useragent';
+import shortid from 'shortid';
 import Config from './config';
 const config = new Config();
 
@@ -13,28 +14,29 @@ const config = new Config();
 log.setLevel(config.loglevel);
 
 /**
- * init database
+ * database
  */
-const databaseName = 'urlshortener';
-
-const client = influx({
-  host: config.dbhost,
-  port: 8086, // optional, default 8086
-  username: 'root',
-  password: 'root',
-  database: databaseName
+mongoose.connect(`mongodb://${config.dbhost}/urlshorten`);
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', () => {
+  log.info('connected');
 });
 
-client.createDatabase(databaseName, (err) => {
-  if (!err) {
-    log.info(`success created ${databaseName}`);
-  } else if (err.code === 'ECONNREFUSED') {
-    log.error('cannot connect to database');
-  } else {
-    log.warn(err.message);
-  }
+const recordSchema = mongoose.Schema({
+  _id: {
+    type: String,
+    default: shortid.generate
+  },
+  url: String,
+  created: { type: Date, default: Date.now }
 });
 
+const visitSchema = mongoose.Schema({
+  _shortId: String,
+  ua: String,
+  created: { type: Date, default: Date.now }
+});
 
 /**
  * init app
@@ -43,49 +45,15 @@ const app = express();
 app.use(morgan('combined'));
 app.use(useragent.express());
 
-
-const shortenSchema = schema({
-  q: String
-});
-
-
-/**
- * decode base64 and parse JSON
- */
-app.use('/shorten', (req, res, next) => {
-  // parse json
-  const requestData = req.requestData;
-  if (/^[\],:{}\s]*$/.test(requestData.replace(/\\["\\\/bfnrtu]/g, '@').
-  replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
-  replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
-    // the json is ok
-    req.requestJSON = JSON.parse(requestData);
-    next();
-  } else {
-    // the json is not ok
-    res.status(400).json({ error: 'not valid json' });
-  }
-}, (req, res, next) => {
-  // validate schema
-  const requestJSON = req.requestJSON;
-  if (shortenSchema(requestJSON)) {
-    log.debug(requestJSON);
-    next();
-  } else {
-    const errors = shortenSchema.errors(requestJSON);
-    res.status(422).json({ error: errors });
-  }
-});
+// parse application/json
+app.use(bodyParser.json());
 
 /**
  * provide root route
  */
 app.get('/', (req, res) => {
-  const hosts = client.getHostsAvailable();
   res.json({
-    message: 'hello',
-    version: process.env.npm_package_version,
-    database: hosts
+    message: 'hello'
   });
 });
 
@@ -93,13 +61,39 @@ app.get('/', (req, res) => {
  * GET /track api
  */
 app.post('/shorten', (req, res) => {
-  // TODO
+  if (!req.body || !req.body.url) {
+    res.status(400).json({ error: 'url not found' });
+    return;
+  }
+
+  // process url
+  const originalUrl = req.body.url;
+  const Record = mongoose.model('Record', recordSchema);
+  const record = new Record({ url: originalUrl });
+  record.save();
+
+  res.json(record);
 });
 
-app.get('/:shortId', (req, res) => {
-  // TODO
-  const longUrl = '';
-  res.redirect(longUrl);
+app.get('/:id', (req, res) => {
+  // redirect to longurl
+  const id = req.params.id;
+
+  const Record = mongoose.model('Record', recordSchema);
+  Record.findOne({ _id: id }, (err, obj) => {
+    if (err) {
+      log.error(err);
+      res.status(500).json({
+        error: err
+      });
+    } else if (!obj) {
+      res.status(400).json({
+        error: 'invalid short link'
+      });
+    } else {
+      res.redirect(obj.url);
+    }
+  });
 });
 
 
