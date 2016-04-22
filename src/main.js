@@ -110,6 +110,14 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
         error: 'invalid short link'
       });
     } else {
+      // store visit info
+      const ua = req.useragent;
+      const Visit = mongoose.model('Visit', visitSchema);
+      const visit = new Visit({
+        _shortId: id,
+        ua: ua.source
+      });
+      visit.save();
       res.redirect(obj.url);
     }
   });
