@@ -6,7 +6,7 @@ urlshortener_production:
     - mongo:mongo
   environment:
     - NODE_ENV=production
-    - VIRTUAL_HOST=urlshortener.digitwalk.com
+    - VIRTUAL_HOST=s.maihoo.com
   log_driver: fluentd
   log_opt:
     fluentd-address: "localhost:24224"
