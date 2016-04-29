@@ -42,7 +42,7 @@ const recordSchema = mongoose.Schema({
 
 const visitSchema = mongoose.Schema({
   _shortId: String,
-  ua: String,
+  _ua: String,
   browser: String,
   platform: String,
   version: String,
@@ -139,16 +139,13 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
         platform,
         version,
         os,
-        ua: ua.source
+        _ua: ua.source
       };
       const visit = new Visit(visitData);
       visit.save();
 
       // Lighthouse track
-      lighthouse.track('redirect', {
-        _shortId: id,
-        ip
-      });
+      lighthouse.track('redirect', visitData);
 
       res.redirect(obj.url);
     }
