@@ -6,6 +6,7 @@ import bodyParser from 'body-parser';
 import useragent from 'express-useragent';
 import shortid from 'shortid';
 import url from 'url';
+import Lighthouse from '@mh/lighthouse-js';
 import Config from './config';
 const config = new Config();
 
@@ -13,6 +14,12 @@ const config = new Config();
  * global settings
  */
 log.setLevel(config.loglevel);
+
+/*
+ * Lighthouse Tracking
+ */
+const lighthouse = new Lighthouse(config.project);
+// lighthouse.setConfig({ debug: true });
 
 /**
  * database
@@ -125,7 +132,7 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
 
       // store data
       const Visit = mongoose.model('Visit', visitSchema);
-      const visit = new Visit({
+      const visitData = {
         _shortId: id,
         ip,
         browser,
@@ -133,8 +140,16 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
         version,
         os,
         ua: ua.source
-      });
+      };
+      const visit = new Visit(visitData);
       visit.save();
+
+      // Lighthouse track
+      lighthouse.track('redirect', {
+        _shortId: id,
+        ip
+      });
+
       res.redirect(obj.url);
     }
   });

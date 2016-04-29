@@ -7,6 +7,7 @@ urlshortener_staging:
   environment:
     - NODE_ENV=staging
     - VIRTUAL_HOST=urlshortener.digitwalk.com
+    - PROJECT_NAME=urlshortener_staging
   log_driver: fluentd
   log_opt:
     fluentd-address: "localhost:24224"
