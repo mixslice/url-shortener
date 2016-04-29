@@ -139,7 +139,7 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
         platform,
         version,
         os,
-        ua: ua.source
+        _ua: ua.source
       };
       const visit = new Visit(visitData);
       visit.save();
