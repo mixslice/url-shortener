@@ -145,10 +145,7 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
       visit.save();
 
       // Lighthouse track
-      lighthouse.track('redirect', {
-        _shortId: id,
-        ip
-      });
+      lighthouse.track('redirect', visitData);
 
       res.redirect(obj.url);
     }
