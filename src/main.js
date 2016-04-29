@@ -42,7 +42,7 @@ const recordSchema = mongoose.Schema({
 
 const visitSchema = mongoose.Schema({
   _shortId: String,
-  ua: String,
+  _ua: String,
   browser: String,
   platform: String,
   version: String,
