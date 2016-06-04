@@ -69,6 +69,7 @@ app.use(bodyParser.json());
  * provide root route
  */
 app.get('/', (req, res) => {
+  ravenClient.captureException(new Error(JSON.stringify({ test: 'test' })));
   res.json({
     message: 'hello'
   });
@@ -79,6 +80,7 @@ app.get('/', (req, res) => {
  */
 app.post('/shorten', (req, res) => {
   if (!req.body || !req.body.url) {
+    newError({ error: 'url not found', status: 422 });
     res.status(400).json({ error: 'url not found' });
     return;
   }
@@ -91,7 +93,7 @@ app.post('/shorten', (req, res) => {
    * only support http(s) yet
    */
   if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-    newError({ error: 'only http and https are supported', status: 422});
+    newError({ error: 'only http and https are supported', status: 422 });
     res.status(422).json({ error: 'only http and https are supported' });
     return;
   }
@@ -100,7 +102,7 @@ app.post('/shorten', (req, res) => {
    * already shortened url
    */
   if (parsedUrl.host === config.host) {
-    newError({ error: 'invalid url', status: 422});
+    newError({ error: 'invalid url', status: 422 });
     res.status(422).json({ error: 'invalid url' });
     return;
   }
@@ -120,12 +122,12 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
   Record.findOne({ _id: id }, (err, obj) => {
     if (err) {
       log.error(err);
-      newError({ error: err , status: 422});
+      newError({ error: err, status: 422 });
       res.status(500).json({
         error: err
       });
     } else if (!obj) {
-      newError({ error: 'invalid short link' , status: 422});
+      newError({ error: 'invalid short link', status: 422 });
       res.status(400).json({
         error: 'invalid short link'
       });
@@ -134,7 +136,6 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
       const ua = req.useragent;
       const browser = ua.browser;
       const platform = ua.platform;
-      const version = ua.version;
       const os = ua.os;
       const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
@@ -145,7 +146,6 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
         ip,
         browser,
         platform,
-        version,
         os,
         _ua: ua.source
       };
@@ -155,8 +155,8 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
         visits: visitData
       });
       // Lighthouse track
-      lighthouse.track('redirect', visitData);
-
+      lighthouse.track('redirect', visitData, (e) =>
+      newError({ name: 'lighthouse_err', error: e }));
       res.redirect(obj.url);
     }
   });
