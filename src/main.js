@@ -136,7 +136,6 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
       const ua = req.useragent;
       const browser = ua.browser;
       const platform = ua.platform;
-      const version = ua.version;
       const os = ua.os;
       const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
@@ -147,7 +146,6 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
         ip,
         browser,
         platform,
-        version,
         os,
         _ua: ua.source
       };
@@ -157,8 +155,8 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
         visits: visitData
       });
       // Lighthouse track
-      lighthouse.track('redirect', visitData);
-
+      lighthouse.track('redirect', visitData, (e) =>
+      newError({ name: 'lighthouse_err', error: e }));
       res.redirect(obj.url);
     }
   });
