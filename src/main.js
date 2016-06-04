@@ -1,6 +1,7 @@
 import log from 'loglevel';
 import express from 'express';
 import morgan from 'morgan';
+import raven from 'raven';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import useragent from 'express-useragent';
@@ -14,6 +15,9 @@ const config = new Config();
  * global settings
  */
 log.setLevel(config.loglevel);
+const ravenClient = new raven.Client('http://0d1344add2e04b718d29c8ea23edd3b3:5d4a4798d32543d0b8d8a13b03dc9962@sentry.digitwalk.com/9');
+ravenClient.patchGlobal();
+const newError = (err) => ravenClient.captureException(new Error(JSON.stringify(err)));
 
 /*
  * Lighthouse Tracking
@@ -87,6 +91,7 @@ app.post('/shorten', (req, res) => {
    * only support http(s) yet
    */
   if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+    newError({ error: 'only http and https are supported', status: 422});
     res.status(422).json({ error: 'only http and https are supported' });
     return;
   }
@@ -95,6 +100,7 @@ app.post('/shorten', (req, res) => {
    * already shortened url
    */
   if (parsedUrl.host === config.host) {
+    newError({ error: 'invalid url', status: 422});
     res.status(422).json({ error: 'invalid url' });
     return;
   }
@@ -114,10 +120,12 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
   Record.findOne({ _id: id }, (err, obj) => {
     if (err) {
       log.error(err);
+      newError({ error: err , status: 422});
       res.status(500).json({
         error: err
       });
     } else if (!obj) {
+      newError({ error: 'invalid short link' , status: 422});
       res.status(400).json({
         error: 'invalid short link'
       });
@@ -143,7 +151,9 @@ app.get(/^\/([0-9A-Za-z\-_]{7,14})$/, (req, res) => {
       };
       const visit = new Visit(visitData);
       visit.save();
-
+      ravenClient.setUserContext({
+        visits: visitData
+      });
       // Lighthouse track
       lighthouse.track('redirect', visitData);
 
